@@ -1,0 +1,167 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/galleria/1.6.1/themes/classic/galleria.classic.min.css" />
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/galleria/1.6.1/galleria.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/galleria/1.6.1/themes/classic/galleria.classic.min.js"></script>
+
+
+
+  </head>
+
+  <body>
+
+  <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Мой сайт</th>
+      <th scope="col">Какой-то сайт</th>
+      <th scope="col">Домклик</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Рыночная цена</th>
+      <td>{{ my_price }} млн ₽</td>
+      <td>-</td>
+      <td>{{ other_prices.market_price }} млн ₽</td>
+    </tr>
+    <tr>
+      <th scope="row">Минимальная рыночная цена</th>
+      <td>{{ my_price1 }}</td>
+      <td>-</td>
+      <td>{{ other_prices.min_market_price }} млн ₽</td>
+    </tr>
+    <tr>
+      <th scope="row">Максимальная рыночная цена</th>
+      <td>-</td>
+      <td>-</td>
+      <td>{{ other_prices.max_market_price }} млн ₽</td>
+    </tr>
+  </tbody>
+</table>
+
+{#      <label>Цена вашей квартиры:</label>#}
+{#      <h1>{{ price }} руб.</h1>#}
+
+
+
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+
+
+<figure class="highcharts-figure">
+    <div id="container"></div>
+</figure>
+
+
+<script type="text/javascript">
+        var data = {{ price_history|safe }}
+        {#var city_points = {{ price_history.city_points }}#}
+        {#var district_points = {{ price_history.district_points }}#}
+        {#var house_points = {{ price_history.house_points }}#}
+        {#var region_points = {{ price_history.region_points }}#}
+
+        Highcharts.chart('container', {
+            chart: {
+                type: 'line'
+            },
+
+            title: {
+                text: 'Динамика изменения цен',
+                align: 'center'
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Цена'
+                }
+            },
+
+            xAxis: {
+                    {#categories: ['2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01', '2019-08-01', '2019-09-01', '2019-10-01', '2019-11-01', '2019-12-01', '2020-01-01', '2020-02-01', '2020-03-01', '2020-04-01', '2020-05-01', '2020-06-01', '2020-07-01', '2020-08-01', '2020-09-01', '2020-10-01', '2020-11-01', '2020-12-01', '2021-01-01', '2021-02-01', '2021-03-01', '2021-04-01', '2021-05-01', '2021-06-01', '2021-07-01', '2021-08-01', '2021-09-01', '2021-10-01', '2021-11-01', '2021-12-01', '2022-01-01', '2022-02-01', '2022-03-01', '2022-04-01', '2022-05-01', '2022-06-01', '2022-07-01', '2022-08-01', '2022-09-01', '2023-01-01', '2023-02-01', '2023-03-01']#}
+                    {#categories: {{ price_history.months }}#}
+                    categories: data.months
+            },
+
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: true
+                }
+            },
+
+            series: [{
+                name: 'Город',
+                data: data.city_points
+            }, {
+                name: 'Район',
+                data: data.district_points
+            }, {
+                name: 'Дом',
+                data: data.house_points
+            }, {
+                name: 'Регион',
+                data: data.region_points
+            }],
+
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 700
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+</script>
+
+
+
+
+<div class="galleria">
+    {% for photo in photos.photos %}
+    <img src={{ photo }}>
+    {% endfor %}
+</div>
+{#  <p>Вернуться на <a href="">главную страницу</a> фотоархива</p>#}
+  <script>
+      (function() {
+          Galleria.run('.galleria');
+      }());
+  </script>
+
+
+
+
+
+  </body>
+</html>
