@@ -9,37 +9,34 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
   </head>
   <body>
-  <form method="post" action="/app/result/">
+  <div class="ramka">
+  <form class="input-form" method="post" action="/">
       {% csrf_token %}
-  <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Адрес</label>
-    <input name="address" type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <div class="div-form1">
+  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="div-form2">
+  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="div-form2">
+    <input name="level" type="number" placeholder="Этаж" class="form-control" id="exampleInputPassword1">
   </div>
   <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Количество комнат</label>
-    <input name="rooms" type="number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
   </div>
   <div class="mb-3">
-    <label for="exampleInputPassword1" class="form-label">Этаж</label>
-    <input name="level" type="number" class="form-control" id="exampleInputPassword1">
+    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
   </div>
   <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Количество этажей в доме</label>
-    <input name="levels" type="number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
   </div>
   <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Площадь</label>
-    <input name="area" type="number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
   </div>
   <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Площадь кухни</label>
-    <input name="kitchen_area" type="number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <button type="submit" class="btn btn-primary">Узнать цену</button>
   </div>
-  <div class="mb-3">
-    <label for="exampleInputEmail1" class="form-label">Почтовый индекс</label>
-    <input name="postal_code" type="number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+  </div>
   </body>
 </html>

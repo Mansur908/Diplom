@@ -1,0 +1,12 @@
+version: '3.3'
+
+volumes:
+  pgdata-apartments-project:
+
+services:
+  web:
+    container_name: apartments-project
+    build: ../ApartmentsProject/
+    restart: always
+    ports:
+      - 8000:8000

@@ -4,12 +4,6 @@ from datetime import date
 
 import keras
 import requests
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 from keras import backend as K
 
 def coeff_determination(y_true, y_pred):
@@ -18,13 +12,11 @@ def coeff_determination(y_true, y_pred):
     return (1 - SS_res/(SS_tot + K.epsilon()))
 
 
-
 def neural_model():
     model = keras.models.load_model('ml_model/model_500it512x3.h5', custom_objects={'coeff_determination': coeff_determination})
     with open("ml_model/model_features.json", "r") as file:
         features = ast.literal_eval(file.read())
     return {"model": model, "features": features}
-
 
 
 headers = {
@@ -85,14 +77,6 @@ def get_price(address, rooms, area):
     return {"market_price": market_price, "min_market_price": min_market_price, "max_market_price": max_market_price, "error": False}
 
 
-
-
-
-
-
-
-
-
 def get_price_history(address):
 
     json_data = {
@@ -125,13 +109,18 @@ def get_price_history(address):
     house_points = json.loads(response.text)["answer"]["house_points"]
     region_points = json.loads(response.text)["answer"]["region_points"]
 
+
     months = [i['month'] for i in city_points]
     city_points = [i["price"] for i in city_points]
     district_points = [i["price"] for i in district_points]
     house_points = [i["price"] for i in house_points]
     region_points = [i["price"] for i in region_points]
 
-    return {"months": months, "city_points": city_points, "district_points": district_points, "house_points": house_points, "region_points": region_points}
+    city_coef = city_points[len(city_points)-1] / city_points[months.index("2022-01-01")]
+    house_coef = house_points[len(house_points)-1] / house_points[months.index("2022-01-01")]
+    district_coef = district_points[len(district_points)-1] / district_points[months.index("2022-01-01")]
+
+    return {"months": months, "city_points": city_points, "district_points": district_points, "house_points": house_points, "region_points": region_points, "city_coef": city_coef, "house_coef": house_coef, "district_coef": district_coef}
 
 
 def get_house_info(address):
@@ -162,37 +151,61 @@ def get_house_info(address):
         headers=headers,
     )
 
-    photos = [f"https://img.dmclk.ru/s960x640q80{i['storage_url']}" for i in json.loads(response.text)["answer"]["house_photos"]]
+    data = json.loads(response.text)
+    try:
+        metro_name = data["answer"]["poi"][0]["display_name"]
+    except:
+        metro_name = None
+    try:
+        metro_distance = data["answer"]["poi"][0]["distance"]
+    except:
+        metro_distance = None
+    try:
+        raion_name = data["answer"]["districts"][0]["display_name"]
+    except:
+        raion_name = None
+    try:
+        built_year = data["answer"]["house_info"]["built_year"]
+    except:
+        built_year = None
+    try:
+        house_address = data["answer"]["name"]
+    except:
+        house_address = None
 
-    return {"photos": photos}
+    lat = data["answer"]['lat']
+    lon = data["answer"]['lon']
+
+    try:
+        photos = [f"https://img.dmclk.ru/s960x640q80{i['storage_url']}" for i in data["answer"]["house_photos"]]
+    except:
+        photos = []
+    return {"photos": photos, "metro_name": metro_name, "metro_distance": metro_distance, "raion_name": raion_name, "built_year": built_year, "house_address": house_address, "lat": lat, "lon": lon}
 
 
 
 
-def get_prediction_model():
-    df = pd.read_csv('https://query.data.world/s/vha3wyujw2famdzxa46zpep5gwdtym')
-    kazan = df[(df['id_region'] == 16) & (df['postal_code'] >= 420000) & (df['postal_code'] < 421000)]
-    kazan = kazan[kazan['price'] < 14000000]
-    kazan = kazan[kazan['area'] < 140]
-    a = kazan.copy()
-    a = a.drop(['Unnamed: 0', 'date', 'building_type', 'geo_lat', 'geo_lon', 'house_id', 'street_id', 'id_region'],
-               axis=1)
-
-    one_hot = pd.get_dummies(a['postal_code'])
-    a = a.drop('postal_code', axis=1)
-    a = a.join(one_hot)
-
-    a.columns = a.columns.astype(str)
-
-    prices = a['price']
-    features = a.drop('price', axis=1)
-
-    X_train, X_test, Y_train, Y_test = train_test_split(features, prices, test_size=0.2, random_state=10)
-
-    regr = LinearRegression()
-    regr.fit(X_train, Y_train)
-
-    # print('Training data r-squared:', regr.score(X_train, Y_train))
-    # print('Test data r-squared:', regr.score(X_test, Y_test))
-
-    return {"model": regr, "features": features}
+# def get_prediction_model():
+#     df = pd.read_csv('https://query.data.world/s/vha3wyujw2famdzxa46zpep5gwdtym')
+#     kazan = df[(df['id_region'] == 16) & (df['postal_code'] >= 420000) & (df['postal_code'] < 421000)]
+#     kazan = kazan[kazan['price'] < 14000000]
+#     kazan = kazan[kazan['area'] < 140]
+#     a = kazan.copy()
+#     a = a.drop(['Unnamed: 0', 'date', 'building_type', 'geo_lat', 'geo_lon', 'house_id', 'street_id', 'id_region'],
+#                axis=1)
+#
+#     one_hot = pd.get_dummies(a['postal_code'])
+#     a = a.drop('postal_code', axis=1)
+#     a = a.join(one_hot)
+#
+#     a.columns = a.columns.astype(str)
+#
+#     prices = a['price']
+#     features = a.drop('price', axis=1)
+#
+#     X_train, X_test, Y_train, Y_test = train_test_split(features, prices, test_size=0.2, random_state=10)
+#
+#     regr = LinearRegression()
+#     regr.fit(X_train, Y_train)
+#
+#     return {"model": regr, "features": features}

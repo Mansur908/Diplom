@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
+    <title>Оценка стоимости квартиры</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
 
@@ -13,17 +13,70 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/galleria/1.6.1/galleria.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/galleria/1.6.1/themes/classic/galleria.classic.min.js"></script>
 
-
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ee420900-5251-4eb5-bcdd-592bd849dea1" type="text/javascript"></script>
 
   </head>
 
-  <body>
+  <body b>
+
+  <div class="ramka">
+  <form class="input-form" method="post" action="/">
+      {% csrf_token %}
+  <div class="div-form1">
+  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="div-form2">
+  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="div-form2">
+    <input name="level" type="number" placeholder="Этаж" class="form-control" id="exampleInputPassword1">
+  </div>
+  <div class="mb-3">
+    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="mb-3">
+    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="mb-3">
+    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="mb-3">
+    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  </div>
+  <div class="mb-3">
+  <button type="submit" class="btn btn-primary">Узнать цену</button>
+  </div>
+</form>
+</div>
+
+<div class="galleria">
+    {% for photo in house_info.photos %}
+    <img src={{ photo }}>
+    {% endfor %}
+</div>
+{#  <p>Вернуться на <a href="">главную страницу</a> фотоархива</p>#}
+  <script>
+      (function() {
+          Galleria.run('.galleria');
+      }());
+  </script>
+
+
+
+<div class="house-info-border">
+    <h3>Информация о доме</h3>
+    <p class="info-p">Адрес</p> <p class="info-value"><b>г. Казань, {{ house_info.house_address }}</b></p>
+    <p class="info-p">Год постройки</p> <p class="info-value"><b>{{ house_info.built_year }}</b></p>
+    <p class="info-p">Метро</p> <p class="info-value"><b>{{ house_info.metro_name }}</b></p>
+    <p class="info-p">Расстояние до метро</p> <p class="info-value"><b>{{ house_info.metro_distance }} км.</b></p>
+    <p class="info-p">Район</p> <p class="info-value"><b>{{ house_info.raion_name }}</b></p>
+</div>
 
   <table class="table">
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Мой сайт</th>
+      <th scope="col">Наша оценка</th>
       <th scope="col">Какой-то сайт</th>
       <th scope="col">Домклик</th>
     </tr>
@@ -31,19 +84,19 @@
   <tbody>
     <tr>
       <th scope="row">Рыночная цена</th>
-      <td>{{ my_price }} млн ₽</td>
+      <td>{{ my_prices.1 }} млн ₽</td>
       <td>-</td>
       <td>{{ other_prices.market_price }} млн ₽</td>
     </tr>
     <tr>
       <th scope="row">Минимальная рыночная цена</th>
-      <td>{{ my_price1 }}</td>
+      <td>{{ my_prices.0 }}</td>
       <td>-</td>
       <td>{{ other_prices.min_market_price }} млн ₽</td>
     </tr>
     <tr>
       <th scope="row">Максимальная рыночная цена</th>
-      <td>-</td>
+      <td>{{ my_prices.2 }}</td>
       <td>-</td>
       <td>{{ other_prices.max_market_price }} млн ₽</td>
     </tr>
@@ -145,23 +198,32 @@
 </script>
 
 
+{#   Карты   #}
+<div id="map"></div>
 
+<script type="text/javascript">
 
-<div class="galleria">
-    {% for photo in photos.photos %}
-    <img src={{ photo }}>
-    {% endfor %}
-</div>
-{#  <p>Вернуться на <a href="">главную страницу</a> фотоархива</p>#}
-  <script>
-      (function() {
-          Galleria.run('.galleria');
-      }());
-  </script>
+	ymaps.ready(init);
+	var myMap;
 
+	function init() {
+		myMap = new ymaps.Map("map", {
+			center: [{{ house_info.lat }}, {{ house_info.lon }}], // Координаты центра карты
+			zoom: 14     // Маштаб карты
+		});
 
+		myMap.controls.add(
+			new ymaps.control.ZoomControl()  // Добавление элемента управления картой
+		);
 
+		myPlacemark = new ymaps.Placemark([{{ house_info.lat }}, {{ house_info.lon }}], {}, {  // Координаты метки объекта
+	        preset: "twirl#invertedBlueClusterIcons" // Тип метки
+        });
 
+        myMap.geoObjects.add(myPlacemark);
+	};
+
+</script>
 
   </body>
 </html>

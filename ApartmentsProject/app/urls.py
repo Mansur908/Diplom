@@ -1,8 +1,7 @@
 from django.urls import path
 
-from app.views import MainPageView, MainView
+from app.views import MainView
 
 urlpatterns = [
-    path('main/', MainPageView.as_view()),
-    path('result/', MainView.as_view()),
+    path('', MainView.as_view()),
 ]
