@@ -6,6 +6,11 @@ import keras
 import requests
 from keras import backend as K
 
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+import time
+
 def coeff_determination(y_true, y_pred):
     SS_res =  K.sum(K.square(y_true - y_pred))
     SS_tot = K.sum(K.square(y_true - K.mean(y_true)))
@@ -50,10 +55,9 @@ def get_price(address, rooms, area):
 
     try:
         response = requests.post('https://liquidator-proxy.domclick.ru/geo/v1/geocode', headers=headers, json=json_data)
+        guid = json.loads(response.text)["answer"]["guid"]
     except:
         return {"market_price": None, "min_market_price": None, "max_market_price": None, "error": True}
-
-    guid = json.loads(response.text)["answer"]["guid"]
 
     params = {
         'quality': '2',
@@ -182,6 +186,72 @@ def get_house_info(address):
         photos = []
     return {"photos": photos, "metro_name": metro_name, "metro_distance": metro_distance, "raion_name": raion_name, "built_year": built_year, "house_address": house_address, "lat": lat, "lon": lon}
 
+
+
+def get_avito_data(address, rooms, area, floor, floorAtHouse):
+    options = webdriver.ChromeOptions()
+    options.add_argument("user-agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(
+        # executable_path="C:/Users/mansu/Downloads/chromedriver_win32/chromedriver",
+        executable_path="../../ApartmentsProject/chromedriver",
+        options=options
+    )
+
+    try:
+        driver.get("https://www.avito.ru/evaluation/realty/")
+        address_field = driver.find_element(By.NAME, "address")
+        address_field.clear()
+        address_field.send_keys(address)
+        time.sleep(1)
+        address_field = driver.find_element(By.CLASS_NAME, "suggest-suggest-gqVpu")
+        address_field.click()
+
+        rooms_field = Select(driver.find_element(By.NAME, "rooms"))
+        rooms_field.select_by_value(rooms)
+
+        area_field = driver.find_element(By.NAME, "area")
+        area_field.clear()
+        area_field.send_keys(area)
+
+        floor_field = driver.find_element(By.NAME, "floor")
+        floor_field.clear()
+        floor_field.send_keys(floor)
+
+        floorAtHouse_field = driver.find_element(By.NAME, "floorAtHouse")
+        floorAtHouse_field.clear()
+        floorAtHouse_field.send_keys(floorAtHouse)
+
+        renovationType = Select(driver.find_element(By.NAME, "renovationType"))
+        renovationType.select_by_value("cosmetic")
+
+        houseType = Select(driver.find_element(By.NAME, "houseType"))
+        houseType.select_by_value("brick")
+
+        button = driver.find_element(By.CLASS_NAME, "index-submitButton-n8vij")
+        driver.execute_script("arguments[0].click();", button)
+        time.sleep(5)
+
+        # min_price = driver.find_element(By.CLASS_NAME, "css-168huo8").text
+        # price = driver.find_element(By.CLASS_NAME, "css-whcfla").text
+        # max_price = driver.find_element(By.CLASS_NAME, "css-168huo8").text
+        # print(min_price.split()[1])
+        # print(price.split()[0])
+        # print(max_price.split()[1])
+
+        spl = str(driver.page_source).split('млн')
+        min_price = spl[0].split("до ")[1]
+        price = spl[1].split("от ")[1]
+        max_price = spl[2].split(">")[-1]
+
+        return({"min_price": min_price, "price": price, "max_price": max_price})
+
+    except Exception as ex:
+        print(ex)
+    finally:
+        driver.close()
+        driver.quit()
 
 
 

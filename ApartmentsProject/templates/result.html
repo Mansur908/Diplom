@@ -23,25 +23,25 @@
   <form class="input-form" method="post" action="/">
       {% csrf_token %}
   <div class="div-form1">
-  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="div-form2">
-  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="div-form2">
     <input name="level" type="number" placeholder="Этаж" class="form-control" id="exampleInputPassword1">
   </div>
   <div class="mb-3">
-    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
   <button type="submit" class="btn btn-primary">Узнать цену</button>
@@ -49,12 +49,17 @@
 </form>
 </div>
 
+
+{% if message %}
+    <h3 align="center">{{ message }}</h3>
+{% else %}
+
 <div class="galleria">
     {% for photo in house_info.photos %}
     <img src={{ photo }}>
     {% endfor %}
 </div>
-{#  <p>Вернуться на <a href="">главную страницу</a> фотоархива</p>#}
+
   <script>
       (function() {
           Galleria.run('.galleria');
@@ -77,7 +82,7 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Наша оценка</th>
-      <th scope="col">Какой-то сайт</th>
+      <th scope="col">Авито</th>
       <th scope="col">Домклик</th>
     </tr>
   </thead>
@@ -85,26 +90,57 @@
     <tr>
       <th scope="row">Рыночная цена</th>
       <td>{{ my_prices.1 }} млн ₽</td>
-      <td>-</td>
+      <td id="avito_price">
+          <div class="load" style="width:30px;height:30px">
+            <img src="../static/img/load.gif" alt="alternate text" /></div>
+      </td>
       <td>{{ other_prices.market_price }} млн ₽</td>
     </tr>
     <tr>
       <th scope="row">Минимальная рыночная цена</th>
-      <td>{{ my_prices.0 }}</td>
-      <td>-</td>
+      <td>{{ my_prices.0 }} млн ₽</td>
+      <td id="avito_min_price">
+          <div class="load" style="width:30px;height:30px">
+            <img src="../static/img/load.gif" alt="alternate text" /></div>
+      </td>
       <td>{{ other_prices.min_market_price }} млн ₽</td>
     </tr>
     <tr>
       <th scope="row">Максимальная рыночная цена</th>
-      <td>{{ my_prices.2 }}</td>
-      <td>-</td>
+      <td>{{ my_prices.2 }} млн ₽</td>
+      <td id="avito_max_price">
+          <div class="load" style="width:30px;height:30px">
+            <img src="../static/img/load.gif" alt="alternate text" /></div>
+      </td>
       <td>{{ other_prices.max_market_price }} млн ₽</td>
     </tr>
   </tbody>
 </table>
 
-{#      <label>Цена вашей квартиры:</label>#}
-{#      <h1>{{ price }} руб.</h1>#}
+
+
+<script>
+$(document).ready(function (){
+    var data = {{ avito_data|safe }}
+    $.ajax({
+        type: 'POST',
+        url: "{% url 'avito' %}",
+        data: {
+            address: data.address,
+            area: {{ avito_data.area }},
+            rooms: {{ avito_data.rooms }},
+            floor: {{ avito_data.floor }},
+            floorAtHouse: {{ avito_data.floorAtHouse }},
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function (data) {
+            $('#avito_min_price').html(data.min_price+" млн ₽");
+            $('#avito_price').html(data.price+" млн ₽");
+            $('#avito_max_price').html(data.max_price+" млн ₽");
+        },
+    });
+});
+</script>
 
 
 
@@ -116,18 +152,12 @@
 
 
 
-
 <figure class="highcharts-figure">
     <div id="container"></div>
 </figure>
 
-
 <script type="text/javascript">
         var data = {{ price_history|safe }}
-        {#var city_points = {{ price_history.city_points }}#}
-        {#var district_points = {{ price_history.district_points }}#}
-        {#var house_points = {{ price_history.house_points }}#}
-        {#var region_points = {{ price_history.region_points }}#}
 
         Highcharts.chart('container', {
             chart: {
@@ -225,5 +255,6 @@
 
 </script>
 
+{% endif %}
   </body>
 </html>

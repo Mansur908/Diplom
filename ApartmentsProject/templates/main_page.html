@@ -13,25 +13,25 @@
   <form class="input-form" method="post" action="/">
       {% csrf_token %}
   <div class="div-form1">
-  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <input name="address" type="text" placeholder="Адрес" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="div-form2">
-  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+  <input name="rooms" type="number" placeholder="Количество комнат" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="div-form2">
-    <input name="level" type="number" placeholder="Этаж" class="form-control" id="exampleInputPassword1">
+    <input name="level" type="number" placeholder="Этаж" class="form-control" id="exampleInputPassword1" required>
   </div>
   <div class="mb-3">
-    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="levels" type="number" placeholder="Количество этажей в доме" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="area" type="number" placeholder="Площадь" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="kitchen_area" type="number" placeholder="Площадь кухни" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
-    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input name="postal_code" type="number" placeholder="Почтовый индекс" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
   <button type="submit" class="btn btn-primary">Узнать цену</button>
