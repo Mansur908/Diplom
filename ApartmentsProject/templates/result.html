@@ -56,7 +56,7 @@
 
 <div class="galleria">
     {% for photo in house_info.photos %}
-    <img src={{ photo }}>
+    <img crossorigin="anonymous" src={{ photo }}>
     {% endfor %}
 </div>
 
@@ -71,10 +71,36 @@
 <div class="house-info-border">
     <h3>Информация о доме</h3>
     <p class="info-p">Адрес</p> <p class="info-value"><b>г. Казань, {{ house_info.house_address }}</b></p>
+    <p class="info-p">Район</p> <p class="info-value"><b>{{ house_info.raion_name }}</b></p>
     <p class="info-p">Год постройки</p> <p class="info-value"><b>{{ house_info.built_year }}</b></p>
     <p class="info-p">Метро</p> <p class="info-value"><b>{{ house_info.metro_name }}</b></p>
+    {% if yandex_data.metro_time %}
+        <p class="info-p">Пешком до метро</p> <p class="info-value"><b>{{ yandex_data.metro_time }} мин.</b></p>
+    {% endif %}
     <p class="info-p">Расстояние до метро</p> <p class="info-value"><b>{{ house_info.metro_distance }} км.</b></p>
-    <p class="info-p">Район</p> <p class="info-value"><b>{{ house_info.raion_name }}</b></p>
+    {% if yandex_data.ceiling_height %}
+        <p class="info-p">Высота потолков</p> <p class="info-value"><b>{{ yandex_data.ceiling_height }} см.</b></p>
+    {% endif %}
+    {% if yandex_data.flats_count %}
+        <p class="info-p">Квартир в доме</p> <p class="info-value"><b>{{ yandex_data.flats_count }}</b></p>
+    {% endif %}
+    {% if yandex_data.floors %}
+        <p class="info-p">Этажей</p> <p class="info-value"><b>{{ yandex_data.floors }}</b></p>
+    {% endif %}
+    {% if yandex_data.has_elevator %}
+        {% if yandex_data.has_elevator == True %}
+            <p class="info-p">Лифт</p> <p class="info-value"><b>есть</b></p>
+        {% else %}
+            <p class="info-p">Лифт</p> <p class="info-value"><b>нет</b></p>
+        {% endif %}
+    {% endif %}
+    {% if yandex_data.has_gas %}
+        {% if yandex_data.has_gas == True %}
+            <p class="info-p">Газ в доме</p> <p class="info-value"><b>есть</b></p>
+        {% else %}
+            <p class="info-p">Газ в доме</p> <p class="info-value"><b>нет</b></p>
+        {% endif %}
+    {% endif %}
 </div>
 
   <table class="table">
@@ -82,6 +108,9 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Наша оценка</th>
+      {% if yandex_data.price %}
+        <th scope="col">Яндекс</th>
+      {% endif %}
       <th scope="col">Авито</th>
       <th scope="col">Домклик</th>
     </tr>
@@ -90,6 +119,9 @@
     <tr>
       <th scope="row">Рыночная цена</th>
       <td>{{ my_prices.1 }} млн ₽</td>
+      {% if yandex_data.price %}
+        <td>{{ yandex_data.price }} млн ₽</td>
+      {% endif %}
       <td id="avito_price">
           <div class="load" style="width:30px;height:30px">
             <img src="../static/img/load.gif" alt="alternate text" /></div>
@@ -99,6 +131,9 @@
     <tr>
       <th scope="row">Минимальная рыночная цена</th>
       <td>{{ my_prices.0 }} млн ₽</td>
+      {% if yandex_data.min_price %}
+        <td>{{ yandex_data.min_price }} млн ₽</td>
+      {% endif %}
       <td id="avito_min_price">
           <div class="load" style="width:30px;height:30px">
             <img src="../static/img/load.gif" alt="alternate text" /></div>
@@ -108,6 +143,9 @@
     <tr>
       <th scope="row">Максимальная рыночная цена</th>
       <td>{{ my_prices.2 }} млн ₽</td>
+      {% if yandex_data.max_price %}
+        <td>{{ yandex_data.max_price }} млн ₽</td>
+      {% endif %}
       <td id="avito_max_price">
           <div class="load" style="width:30px;height:30px">
             <img src="../static/img/load.gif" alt="alternate text" /></div>
@@ -176,8 +214,6 @@ $(document).ready(function (){
             },
 
             xAxis: {
-                    {#categories: ['2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01', '2019-05-01', '2019-06-01', '2019-07-01', '2019-08-01', '2019-09-01', '2019-10-01', '2019-11-01', '2019-12-01', '2020-01-01', '2020-02-01', '2020-03-01', '2020-04-01', '2020-05-01', '2020-06-01', '2020-07-01', '2020-08-01', '2020-09-01', '2020-10-01', '2020-11-01', '2020-12-01', '2021-01-01', '2021-02-01', '2021-03-01', '2021-04-01', '2021-05-01', '2021-06-01', '2021-07-01', '2021-08-01', '2021-09-01', '2021-10-01', '2021-11-01', '2021-12-01', '2022-01-01', '2022-02-01', '2022-03-01', '2022-04-01', '2022-05-01', '2022-06-01', '2022-07-01', '2022-08-01', '2022-09-01', '2023-01-01', '2023-02-01', '2023-03-01']#}
-                    {#categories: {{ price_history.months }}#}
                     categories: data.months
             },
 

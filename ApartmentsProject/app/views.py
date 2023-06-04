@@ -3,9 +3,11 @@ from django.shortcuts import render
 from django.views import View
 
 from app.forms import ObjectForm
-from app.utils import get_price, get_price_history, neural_model, get_house_info, get_avito_data
+from app.utils import get_price, get_price_history, neural_model, get_house_info, get_avito_data, catboost_model, \
+    get_yandex_data
 
-prediction_model = neural_model()
+# prediction_model1 = neural_model()
+prediction_model = catboost_model()
 
 class MainView(View):
 
@@ -29,21 +31,32 @@ class MainView(View):
 
             price_history = get_price_history(address=r.cleaned_data.get("address"))
             my_prices = []
-            my_prices.append(round(prediction_model.get("model").predict(f)[0][0]*price_history.get("city_coef")/1000000, 2))
-            my_prices.append(round(prediction_model.get("model").predict(f)[0][0]*price_history.get("house_coef")/1000000, 2))
-            my_prices.append(round(prediction_model.get("model").predict(f)[0][0]*price_history.get("district_coef")/1000000, 2))
-
-
-            my_prices.sort()
-            print(my_prices)
+            print(prediction_model.get("model").predict(f))
+            # print()
+            # print(round(prediction_model1.get("model").predict(f)[0][0]*price_history.get("city_coef")/1000000, 2))
+            # print(round(prediction_model1.get("model").predict(f)[0][0]*price_history.get("house_coef")/1000000, 2))
+            # print(round(prediction_model1.get("model").predict(f)[0][0]*price_history.get("district_coef")/1000000, 2))
+            # print()
 
             house_info = get_house_info(address=r.cleaned_data.get("address"))
+            # coef = (100 + ((int(house_info.get("built_year") - 2000))/2)) / 100
+            # if coef < 0.85: coef = 0.85
+            # print(coef)
+            coef = 1
+            my_prices.append(
+                round((prediction_model.get("model").predict(f)[0] * price_history.get("city_coef") * coef)/ 1000000, 2))
+            my_prices.append(
+                round((prediction_model.get("model").predict(f)[0] * price_history.get("house_coef") * coef) / 1000000, 2))
+            my_prices.append(
+                round((prediction_model.get("model").predict(f)[0] * price_history.get("district_coef") * coef) / 1000000, 2))
+            my_prices.sort()
 
             avito_data = {"address": r.cleaned_data.get("address"), "area": r.cleaned_data.get("area"), "rooms": r.cleaned_data.get("rooms"), "floor": data.get("level"), "floorAtHouse": data.get("levels")}
-
+            yandex_data = get_yandex_data(address=data.get("address"), rooms=data.get("rooms"), area=data.get("area"))
+            print(yandex_data)
             return render(request, 'result.html',
                           {"my_prices": my_prices, "other_prices": prices, "price_history": price_history,
-                           "house_info": house_info, "avito_data": avito_data})
+                           "house_info": house_info, "avito_data": avito_data, "yandex_data": yandex_data})
             # if not prices.get("error"):
             #     return render(request, 'result.html', {"my_prices": my_prices, "other_prices": prices, "price_history": price_history, "house_info": house_info})
             # else:
