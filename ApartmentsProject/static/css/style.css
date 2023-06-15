@@ -37,7 +37,7 @@
 }
 
 .highcharts-data-table tr:hover {
-    background: #f1f7ff;
+    background: #a5cbe8;
 }
 
 .galleria{
@@ -51,7 +51,7 @@
     margin: 3% 60%;
     height: 480px;
     width: 460px;
-    background-color: #ffffff;
+    /*background-color: #ffffff;*/
 }
 
 .info-p{
@@ -100,7 +100,7 @@
 .ramka{
     height: 140px;
     width: 100%;
-    background-color: #ffffff;
+    /*background-color: #ffffff;*/
 }
 
 .btn{
@@ -109,7 +109,7 @@
 }
 
 body{
-    background-color: #f5f9fc/* Цвет фона веб-страницы */
+    background-color: #a5cbe8/* Цвет фона веб-страницы */
    }
 
 .loader {

@@ -2,9 +2,7 @@ import ast
 import json
 from datetime import date
 
-import keras
 import requests
-from keras import backend as K
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,17 +10,6 @@ from selenium.webdriver.support.ui import Select
 import time
 from catboost import CatBoostRegressor
 
-def coeff_determination(y_true, y_pred):
-    SS_res =  K.sum(K.square(y_true - y_pred))
-    SS_tot = K.sum(K.square(y_true - K.mean(y_true)))
-    return (1 - SS_res/(SS_tot + K.epsilon()))
-
-
-def neural_model():
-    model = keras.models.load_model('ml_model/model_500it512x3.h5', custom_objects={'coeff_determination': coeff_determination})
-    with open("ml_model/model_features.json", "r") as file:
-        features = ast.literal_eval(file.read())
-    return {"model": model, "features": features}
 
 def catboost_model():
     from_file = CatBoostRegressor()
@@ -63,18 +50,15 @@ def get_price(address, rooms, area):
 
     try:
         response = requests.post('https://liquidator-proxy.domclick.ru/geo/v1/geocode', headers=headers, json=json_data, verify=False)
-        print(response.text)
         guid = json.loads(response.text)["answer"]["guid"]
     except:
         return {"market_price": None, "min_market_price": None, "max_market_price": None, "error": True}
 
     params = {
         'quality': '2',
-        # 'wall_material': '2',
         'rooms': f'{rooms}',
         'comm_sq': f'{area}',
-        'guid': guid,  # '247df637-c07d-4320-92d4-e9b2edcc33e1',
-        # 'include_analogs': '1',
+        'guid': guid
     }
 
     response = requests.get(
@@ -269,47 +253,7 @@ def get_avito_data(address, rooms, area, floor, floorAtHouse):
 
 
 def get_yandex_data(address, rooms, area):
-    cookies = {
-        'gdpr': '0',
-        '_ym_uid': '16628061384553095',
-        'suid': '229083780277c594cd435947c5fa1166.0d84a3470a8e929cfc8e8323ec62793d',
-        'yandex_login': 'mansurnurgaleev',
-        'yandexuid': '4568416251597769814',
-        'my': 'YwA=',
-        'L': 'R3UDUlpwRwZ3UFhiemhQYkR0TwFhXHZWFDsIJg8TKkcVCSMeNzMj.1671038781.15191.360086.569d8c528d7b688439695ec3de6fa469',
-        'font_loaded': 'YSv1',
-        'i': 'hbU0esgR6Uiun3l8Yk1AI6ZS+6gvNar4AIRoIBQ5Dxca6+1mvQydxiO1zamYr7mJZDkwq4NHt7ecE21BuHy3jkSdtPM=',
-        'link_to_global_tooltip_shown': 'YES',
-        'backcall_agreement_popup_shown': 'YES',
-        'is_gdpr': '0',
-        'is_gdpr_b': 'CI3/eBCXtwEoAg==',
-        'yandex_csyr': '1684008015',
-        'yandex_gid': '43',
-        '_yasc': 'z/KZeoM9i5NQVsk89ec/62Ff2AWvvUlf0yhRVhhlfi8EqmqvyWpkSZdcX1Lr1hvs',
-        '_ym_d': '1685099584',
-        '_yasc': 'lp6sUguEHa5sJvyGW6pjBF62r/YJOZTmMJLTQtFHcUiutfB50ywIJvJofOk=',
-        'adSource': 'yandex_direct%2C1685099588259%2C460_67550027_msk_poisk_tgo_newbuilding_common_adsource%2Ccid%3A67550027%7Cgid%3A4748775472%7Caid%3A11405341657%7Cph%3A44260587579%7Cpt%3Apremium%7Cpn%3A1%7Csrc%3Anone%7Cst%3Asearch',
-        'show_egrn_reports_link': 'NO_717635560',
-        'housearch_popup_shown': 'YES',
-        'exp_uid': '1168559c-5e7f-4c21-ba44-418355c1d3f7',
-        '_ga': 'GA1.1.1269829652.1685099625',
-        '_ga_CP0397ZQ47': 'GS1.1.1685099625.1.1.1685099994.0.0.0',
-        'rgid': '582357',
-        '_ym_isad': '2',
-        '_ym_visorc': 'b',
-        'spravka': 'dD0xNjg1ODk0NDE4O2k9MTc2LjUyLjI2LjIwNDtEPTM3RDhCOTA1MTU2NzY4MkVDNTE1QThDOEM5ODM0MjQ1MzUzM0E4Q0Q0MzNGNjgzNzhDOTBGNTA1QTNCQzdCRDA3MTZCN0UyMjBERjcyRjlGMENBNURFNkUyN0U5NjVDRjc0N0Q3MkU1NTlDOTRBQUNCNUVGOUU2NDBDO3U9MTY4NTg5NDQxODI1MDgxNzE3ODtoPWM4YTE4NjYyYzNjODgzYWU2YzA0MzM5NjQ4MmMxZWZk',
-        '_csrf_token': 'b55e54b8ae12e31768158260094590f018fd2df2bb8b3fde',
-        'prev_uaas_data': '4568416251597769814%23761679%23746795%23772130%23710253%23721757%23760224%23758923%23763775%23213160%23361531%23610826%23337343%23761554%23763787%23765891%23777831%23769750',
-        'prev_uaas_expcrypted': 'gVX_ek_V991YXzAvIdEuoBdeKC_QH0DFpe07AWfIRRYp2T7XiZhOFQuzKW6_v_GnHe0-LUF0WZmxelcEFiNcTMk-PiY9aDy2oYW2Awjny7Wuxc_tSWma6jAF6KEMBcEmJs3NIdAOyHvpA9fSAm7R2QnRmRJk6mre8Pt336JNjJEOBHknqGEOjHnePLXJQBW8ChdflWwaYSlkqfnDTZS-lKttYsG5arFdCzn1hQpeMxj6wLQmPTPu3drnmcKZS7KjilUrC4t0i44%2C',
-        'Session_id': '3:1685894418.5.1.1657919276792:gBw0sA:27.1.2:1|1659530635.-1.0|717635560.-1.2.1:135228406.2:13119505|6:10182473.13434.TjDpYALWK0OcFO5mbp3N5jH6BpA',
-        'sessar': '1.99.CiC-sCFeG3pYu_kbEpEi4MyydAoPHQRcWhwU_sC62OkSWA.htEQU-EImnRwCBUcAmSYtvbJeZ4JFlwM-qXLfUw0_gI',
-        'yp': '2001253698.pcs.0#1717362811.p_sw.1685826811#1686929947.hdrc.0#1712309349.stltp.serp_bk-map_1_1680773349#1996605646.hks.0#1716985620.p_cl.1685449620#1686241324.mcv.1#1686241324.mcl.190w8iu#1686331247.szm.1:1680x1050:1680x939#1717362812.p_undefined.1685826811#2001254418.udn.cDptYW5zdXJudXJnYWxlZXY%3D',
-        'ys': 'udn.cDptYW5zdXJudXJnYWxlZXY%3D#c_chck.1481632492',
-        'mda2_beacon': '1685894418915',
-        'sso_status': 'sso.passport.yandex.ru:synchronized',
-        'from': 'other',
-        'from_lifetime': '1685894424902',
-    }
+    cookies = {}
 
     headers = {
         'authority': 'realty.ya.ru',
