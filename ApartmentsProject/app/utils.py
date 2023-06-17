@@ -198,8 +198,7 @@ def get_avito_data(address, rooms, area, floor, floorAtHouse):
 
     try:
         driver = webdriver.Chrome(
-            executable_path="C:/Users/mansu/Downloads/chromedriver_win32/chromedriver.exe",
-            # executable_path="/usr/src/project/chromedriver",
+            executable_path="/usr/src/project/chromedriver",
             # executable_path="../../ApartmentsProject/chromedriver.exe",
             options=options
         )
